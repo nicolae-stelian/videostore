@@ -24,50 +24,91 @@ class Customer
         return $this->name;
     }
 
-    public function statement()
+    public function txtStatement()
     {
-        $totalAmount = 0;
-        $frequentRenterPoints = 0;
         $result = "Rental Record for " . $this->getName() . "\n";
 
         /** @var Rental $rental */
         foreach ($this->rentals as $rental) {
-            $thisAmount = 0;
-
-            //determine amounts for each line
-            switch ($rental->getMovie()->getPriceCode()) {
-                case Movie::REGULAR:
-                    $thisAmount += 2;
-                    if ($rental->getDaysRented() > 2) {
-                        $thisAmount += ($rental->getDaysRented() - 2) * 1.5;
-                    }
-                    break;
-                case Movie::NEW_RELEASE:
-                    $thisAmount += $rental->getDaysRented() * 3;
-                    break;
-                case Movie::CHILDRENS:
-                    $thisAmount += 1.5;
-                    if ($rental->getDaysRented() > 3) {
-                        $thisAmount += ($rental->getDaysRented() - 3) * 1.5;
-                    }
-                    break;
-            }
-
-            // add frequent renter points
-            $frequentRenterPoints++;
-            if ($rental->getMovie()->getPriceCode() == Movie::NEW_RELEASE
-                && $rental->getDaysRented() > 1
-            ) {
-                $frequentRenterPoints++;
-            }
-
+            $thisAmount = $this->calculateCharge($rental);
             //show figures for this rental
             $result .= "\t" . $rental->getMovie()->getTitle() . "\t" . $thisAmount . "\n";
-            $totalAmount += $thisAmount;
         }
+
+        $frequentRenterPoints = $this->calculateTotalFrequentRenterPoints();
+        $totalAmount = $this->calculateTotalCharge();
+
         //add footer lines
         $result .= "You owed " . $totalAmount . "\n";
         $result .= "You earned " . $frequentRenterPoints . " frequent renter points\n";
         return $result;
+    }
+
+    /**
+     * @param $rental
+     *
+     * @return float|int
+     */
+    protected function calculateCharge(Rental $rental)
+    {
+        $amount = 0;
+        switch ($rental->getMovie()->getPriceCode()) {
+            case Movie::REGULAR:
+                $amount += 2;
+                if ($rental->getDaysRented() > 2) {
+                    $amount += ($rental->getDaysRented() - 2) * 1.5;
+                }
+                break;
+            case Movie::NEW_RELEASE:
+                $amount += $rental->getDaysRented() * 3;
+                break;
+            case Movie::CHILDRENS:
+                $amount += 1.5;
+                if ($rental->getDaysRented() > 3) {
+                    $amount += ($rental->getDaysRented() - 3) * 1.5;
+                }
+                break;
+        }
+        return $amount;
+    }
+
+    /**
+     * @param $rental
+     *
+     * @return mixed
+     */
+    protected function calculateFrequentRenterPoints(Rental $rental)
+    {
+        $frequentRenterPoints = 1;
+
+        if ($rental->getMovie()->getPriceCode() == Movie::NEW_RELEASE
+            && $rental->getDaysRented() > 1
+        ) {
+            $frequentRenterPoints += 1;
+            return $frequentRenterPoints;
+        }
+
+        return $frequentRenterPoints;
+    }
+
+    protected function calculateTotalCharge()
+    {
+        $totalAmount = 0;
+        foreach ($this->rentals as $rental) {
+            $thisAmount = $this->calculateCharge($rental);
+            $totalAmount += $thisAmount;
+        }
+        return $totalAmount;
+    }
+
+    protected function calculateTotalFrequentRenterPoints()
+    {
+        $totalPoints = 0;
+        /** @var Rental $rental */
+        foreach ($this->rentals as $rental) {
+            $totalPoints += $this->calculateFrequentRenterPoints($rental);
+        }
+
+        return $totalPoints;
     }
 } 
