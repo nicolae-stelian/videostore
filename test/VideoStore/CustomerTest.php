@@ -25,13 +25,13 @@ class CustomerTest extends \PHPUnit_Framework_TestCase
             ),
 
             array(
-                Movie::CHILDRENS,
+                Movie::CHILDREN,
                 'days'         => 1,
                 'amount'       => 1.5,
                 'renterPoints' => 1
             ),
             array(
-                Movie::CHILDRENS,
+                Movie::CHILDREN,
                 'days'         => 4,
                 'amount'       => 3,
                 'renterPoints' => 1
