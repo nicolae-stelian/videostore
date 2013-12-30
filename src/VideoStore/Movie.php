@@ -57,6 +57,14 @@ class Movie
     }
 
     /**
+     * @param $daysRented
+     */
+    public function calculateFrequentRenterPoints($daysRented)
+    {
+        return $this->priceType->calculateFrequentRenterPoints($daysRented);
+    }
+
+    /**
      * @return Price
      */
     public function getPriceType()
