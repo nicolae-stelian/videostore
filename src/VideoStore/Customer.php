@@ -4,6 +4,8 @@
 namespace VideoStore;
 
 
+use VideoStore\Statement\TextStatement;
+
 class Customer
 {
     private $name = '';
@@ -25,15 +27,18 @@ class Customer
         $this->rentals[] = $rental;
     }
 
+    public function getRentals()
+    {
+        return $this->rentals;
+    }
+
     /**
      * @return string
      */
     public function txtStatement()
     {
-        $result = $this->txtHeader();
-        $result .= $this->txtBody();
-        $result .= $this->txtFooter();
-        return $result;
+        $txt = new TextStatement($this);
+        return $txt->statement();
     }
 
     /**
@@ -47,7 +52,7 @@ class Customer
     /**
      * @return int
      */
-    protected function calculateTotalFrequentRenterPoints()
+    public function calculateTotalFrequentRenterPoints()
     {
         $totalPoints = 0;
         /** @var Rental $rental */
@@ -61,7 +66,7 @@ class Customer
     /**
      * @return int
      */
-    protected function calculateTotalCharge()
+    public function calculateTotalCharge()
     {
         $totalAmount = 0;
         /** @var Rental $rental */
@@ -71,44 +76,4 @@ class Customer
         }
         return $totalAmount;
     }
-
-    /**
-     * @return string
-     */
-    protected function txtHeader()
-    {
-        $result = "Rental Record for " . $this->getName() . "\n";
-        return $result;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    protected function txtBody()
-    {
-        $result = '';
-        /** @var Rental $rental */
-        foreach ($this->rentals as $rental) {
-            $thisAmount = $rental->calculateCharge();
-            //show figures for this rental
-            $result .= "\t" . $rental->getMovie()->getTitle() . "\t" . $thisAmount . "\n";
-        }
-        return $result;
-    }
-
-    /**
-     *
-     * @return string
-     */
-    protected function txtFooter()
-    {
-        $frequentRenterPoints = $this->calculateTotalFrequentRenterPoints();
-        $totalAmount = $this->calculateTotalCharge();
-
-        //add footer lines
-        $result = "You owed " . $totalAmount . "\n";
-        $result .= "You earned " . $frequentRenterPoints . " frequent renter points\n";
-        return $result;
-    }
-} 
+}
